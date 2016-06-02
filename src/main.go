@@ -39,13 +39,13 @@ func listen() error {
 		return fmt.Errorf("Database Open Error : %v", err)
 	}
 
-	http.Handle("/static/", http.FileServer(http.Dir("..")))
+	http.Handle("/static/", http.FileServer(http.Dir("")))
 	return http.ListenAndServe(":5005", nil)
 }
 
 func setTemplates(w http.ResponseWriter, p interface{}, files ...string) {
 
-	templateDir := "../templates"
+	templateDir := "templates"
 
 	tmpls := make([]string, 0)
 	tmpls = append(tmpls, templateDir+"/layout.tmpl")
