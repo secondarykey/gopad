@@ -3,20 +3,20 @@ package main
 import (
 	"database/sql"
 	"fmt"
-	_ "github.com/mattn/go-sqlite3"
 	"html/template"
 	"net/http"
 	"os"
+
+	_ "github.com/mattn/go-sqlite3"
+	"github.com/pborman/uuid"
 )
 
 func init() {
 
-	// list
 	http.HandleFunc("/", listHandler)
-
-	// view
-
-	// edit
+	http.HandleFunc("/create", createHandler)
+	http.HandleFunc("/view/", viewHandler)
+	http.HandleFunc("/edit/", editHandler)
 
 	// presentation
 
@@ -64,8 +64,29 @@ func setTemplates(w http.ResponseWriter, p interface{}, files ...string) {
 func listHandler(w http.ResponseWriter, r *http.Request) {
 
 	tc := make(map[string]interface{})
-	tc["MemoList"] = nil
-	tc["User"] = nil
+
+	memoList := Memo{}.Query()
+	tc["MemoList"] = memoList
 
 	setTemplates(w, tc, "list.tmpl")
+}
+
+func createHandler(w http.ResponseWriter, r *http.Request) {
+	id := uuid.New()
+	memo := Memo{Id: id}
+
+	memo.Save()
+	http.Redirect(w, r, "/view/"+id, 301)
+}
+
+func viewHandler(w http.ResponseWriter, r *http.Request) {
+	tc := make(map[string]interface{})
+
+	setTemplates(w, tc, "view.tmpl")
+}
+
+func editHandler(w http.ResponseWriter, r *http.Request) {
+	tc := make(map[string]interface{})
+
+	setTemplates(w, tc, "edit.tmpl")
 }

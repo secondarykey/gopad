@@ -2,7 +2,7 @@ package main
 
 //+AR
 type Memo struct {
-	Id    int `db:"pk"`
+	Id    string `db:"pk"`
 	Title string
 	Memo  string
 }
