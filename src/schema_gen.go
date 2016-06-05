@@ -20,7 +20,7 @@ func (m *Memo) newRelation() *MemoRelation {
 	r.Select(
 		"id",
 		"title",
-		"memo",
+		"content",
 	)
 
 	return r
@@ -43,11 +43,11 @@ func (r *MemoRelation) Select(columns ...string) *MemoRelation {
 	return r
 }
 
-func (m Memo) Find(id string) (*Memo, error) {
+func (m Memo) Find(id int) (*Memo, error) {
 	return m.newRelation().Find(id)
 }
 
-func (r *MemoRelation) Find(id string) (*Memo, error) {
+func (r *MemoRelation) Find(id int) (*Memo, error) {
 	return r.FindBy("id", id)
 }
 
@@ -161,9 +161,9 @@ type MemoParams Memo
 
 func (m Memo) Build(p MemoParams) *Memo {
 	return &Memo{
-		Id:    p.Id,
-		Title: p.Title,
-		Memo:  p.Memo,
+		Id:      p.Id,
+		Title:   p.Title,
+		Content: p.Content,
 	}
 }
 
@@ -190,8 +190,8 @@ func (m *Memo) Save(validate ...bool) (bool, *ar.Errors) {
 	errs := &ar.Errors{}
 	if m.IsNewRecord() {
 		ins := ar.NewInsert(db, logger).Table("memos").Params(map[string]interface{}{
-			"title": m.Title,
-			"memo":  m.Memo,
+			"title":   m.Title,
+			"content": m.Content,
 		})
 
 		if result, err := ins.Exec(); err != nil {
@@ -199,15 +199,15 @@ func (m *Memo) Save(validate ...bool) (bool, *ar.Errors) {
 			return false, errs
 		} else {
 			if lastId, err := result.LastInsertId(); err == nil {
-				m.Id = string(lastId)
+				m.Id = int(lastId)
 			}
 		}
 		return true, nil
 	} else {
 		upd := ar.NewUpdate(db, logger).Table("memos").Params(map[string]interface{}{
-			"id":    m.Id,
-			"title": m.Title,
-			"memo":  m.Memo,
+			"id":      m.Id,
+			"title":   m.Title,
+			"content": m.Content,
 		}).Where("id", m.Id)
 
 		if _, err := upd.Exec(); err != nil {
@@ -226,8 +226,8 @@ func (m *Memo) Update(p MemoParams) (bool, *ar.Errors) {
 	if !ar.IsZero(p.Title) {
 		m.Title = p.Title
 	}
-	if !ar.IsZero(p.Memo) {
-		m.Memo = p.Memo
+	if !ar.IsZero(p.Content) {
+		m.Content = p.Content
 	}
 	return m.Save()
 }
@@ -240,8 +240,8 @@ func (m *Memo) UpdateColumns(p MemoParams) (bool, *ar.Errors) {
 	if !ar.IsZero(p.Title) {
 		m.Title = p.Title
 	}
-	if !ar.IsZero(p.Memo) {
-		m.Memo = p.Memo
+	if !ar.IsZero(p.Content) {
+		m.Content = p.Content
 	}
 	return m.Save(false)
 }
@@ -318,8 +318,8 @@ func (m *Memo) fieldValueByName(name string) interface{} {
 		return m.Id
 	case "title", "memos.title":
 		return m.Title
-	case "memo", "memos.memo":
-		return m.Memo
+	case "content", "memos.content":
+		return m.Content
 	default:
 		return ""
 	}
@@ -331,8 +331,8 @@ func (m *Memo) fieldPtrByName(name string) interface{} {
 		return &m.Id
 	case "title", "memos.title":
 		return &m.Title
-	case "memo", "memos.memo":
-		return &m.Memo
+	case "content", "memos.content":
+		return &m.Content
 	default:
 		return nil
 	}
@@ -360,6 +360,6 @@ func (m *Memo) columnNames() []string {
 	return []string{
 		"id",
 		"title",
-		"memo",
+		"content",
 	}
 }

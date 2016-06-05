@@ -6,16 +6,16 @@
 {{end}}
 
 {{define "Title"}}
-{{.Memo.Name}}
+{{.Memo.Title}}
 {{end}}
 
-{{define "menu"}}
-<h1>{{.Memo.Name}}</h1>
+{{define "content"}}
+<h1>{{.Memo.Title}}</h1>
 
   <input type="hidden" id="editor" value="{{.Memo.Content}}"/>
   <div class="row" style="background-color:white;">
     <div id="result" style="width:100%;min-height:200px;"></div>
   </div>
 
-<a class="btn btn-success form-control" href="/memo/edit/{{.Memo.Key}}" role="button">Edit</a>
+<a class="btn btn-success form-control" href="/edit/{{.Memo.Id}}" role="button">Edit</a>
 {{end}}
