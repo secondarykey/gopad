@@ -9,6 +9,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"path/filepath"
 	"strconv"
 	"strings"
 
@@ -27,10 +28,13 @@ func init() {
 	log.SetFlags(log.Lshortfile)
 }
 
+var baseDir string
+
 func main() {
 
 	var port int
 	flag.IntVar(&port, "p", 5005, "Use Port")
+	flag.StringVar(&baseDir, "base", "", "Base Directory")
 
 	flag.Parse()
 
@@ -47,14 +51,14 @@ func main() {
 
 	err := listen(dbfile, port)
 	if err != nil {
-		fmt.Printf("gopad listen Error :%v\n", err)
+		log.Printf("gopad listen Error :%v\n", err)
 		os.Exit(1)
 	}
 }
 
 func listen(file string, p int) error {
 
-	fmt.Println("###### gopad Start")
+	log.Println("###### gopad Start(Base Directory:[" + baseDir + "]")
 	_, err := os.Stat(file)
 	flag := err == nil
 
@@ -64,26 +68,27 @@ func listen(file string, p int) error {
 	}
 
 	if !flag {
-		fmt.Println("---- CREATE TABLE[" + file + "]")
+		log.Println("---- CREATE TABLE[" + file + "]")
 		_, err := db.Exec("CREATE TABLE memos(ID INTEGER PRIMARY KEY AUTOINCREMENT,TITLE VARCHAR(255),CONTENT TEXT)")
 		if err != nil {
 			return fmt.Errorf("Create Table Error : %v", err)
 		}
 	}
 
-	fmt.Println("###### Serve Database[" + file + "]")
+	log.Println("###### Serve Database[" + file + "]")
 	Use(db)
 
-	http.Handle("/static/", http.FileServer(http.Dir("")))
+	http.Handle("/static/", http.FileServer(http.Dir(baseDir)))
 
 	port := fmt.Sprintf("%d", p)
-	fmt.Println("###### Serve Web [" + port + "]")
+	log.Println("###### Serve Web [" + port + "]")
+
 	return http.ListenAndServe(":"+port, nil)
 }
 
 func setTemplates(w http.ResponseWriter, p interface{}, files ...string) {
 
-	templateDir := "templates"
+	templateDir := filepath.Join(baseDir, "templates")
 
 	tmpls := make([]string, 0)
 	tmpls = append(tmpls, templateDir+"/layout.tmpl")
@@ -127,9 +132,7 @@ func createHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	key := fmt.Sprintf("%d", memo.Id)
-	fmt.Println(key)
-
-	http.Redirect(w, r, "/view/"+key, 301)
+	http.Redirect(w, r, "/view/"+key, 302)
 }
 
 func viewHandler(w http.ResponseWriter, r *http.Request) {
@@ -153,12 +156,12 @@ func getMemo(r *http.Request) (*Memo, error) {
 
 	id, err := strconv.Atoi(key)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("%v : key = %s", err, key)
 	}
 
 	m, err := Memo{}.Find(id)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("%v : id = %d", err, id)
 	}
 	return m, nil
 }
@@ -171,30 +174,44 @@ func editHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if r.Method == "POST" {
-		r.ParseForm()
-
-		m.Title = r.FormValue("title")
-		m.Content = r.FormValue("content")
-
-		m.Save()
-
-	} else if r.Method == "DELETE" {
-		m.Destroy()
-	} else {
-
+	if r.Method == "GET" {
 		tc := make(map[string]interface{})
 		tc["Memo"] = m
 
 		setTemplates(w, tc, "edit.tmpl")
 		return
+	} else if r.Method == "POST" {
+		r.ParseForm()
+
+		m.Title = r.FormValue("title")
+		m.Content = r.FormValue("content")
+
+		_, err = m.Save()
+
+	} else if r.Method == "DELETE" {
+		_, err = m.Destroy()
+
+	} else {
+		http.Error(w, "Not Allowed Method "+r.Method, http.StatusMethodNotAllowed)
+		return
 	}
 
-	w.WriteHeader(200)
+	//return JSON
+
+	flg := err == nil
+	msg := "success " + r.Method
+	code := 200
+	if !flg {
+		code = 500
+		msg = err.Error()
+	}
+
+	w.WriteHeader(code)
 	enc := json.NewEncoder(w)
+
 	d := map[string]interface{}{
-		"success": true,
+		"success":  flg,
+		"messages": msg,
 	}
 	enc.Encode(d)
-
 }
