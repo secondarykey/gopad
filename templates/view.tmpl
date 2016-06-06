@@ -5,17 +5,16 @@
 <script src="/static/js/markdown.js"></script>
 {{end}}
 
-{{define "Title"}}
-{{.Memo.Title}}
-{{end}}
-
 {{define "content"}}
+
 <h1>{{.Memo.Title}}</h1>
 
-  <input type="hidden" id="editor" value="{{.Memo.Content}}"/>
+  <input type="hidden" id="content" value="{{.Memo.Content}}"/>
+
   <div class="row" style="background-color:white;">
     <div id="result" style="width:100%;min-height:200px;"></div>
   </div>
 
 <a class="btn btn-success form-control" href="/edit/{{.Memo.Id}}" role="button">Edit</a>
+
 {{end}}

@@ -162,7 +162,7 @@ pre.speak-me {
 	background-color:papayawhip;
 }
 
-#editor {
+#content {
    resize: vertical;
    min-height: 500px;
    font-family: Consolas, 'Courier New', Courier, Monaco, monospace;

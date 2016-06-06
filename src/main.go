@@ -2,6 +2,7 @@ package main
 
 import (
 	"database/sql"
+	"encoding/json"
 	"fmt"
 	"html/template"
 	"net/http"
@@ -18,7 +19,7 @@ func init() {
 	http.HandleFunc("/view/", viewHandler)
 	http.HandleFunc("/edit/", editHandler)
 
-	http.HandleFunc("/test", createHandler)
+	http.HandleFunc("/create", createHandler)
 	// presentation
 
 }
@@ -77,8 +78,6 @@ func setTemplates(w http.ResponseWriter, p interface{}, files ...string) {
 
 func listHandler(w http.ResponseWriter, r *http.Request) {
 
-	fmt.Println("List Handler")
-
 	tc := make(map[string]interface{})
 
 	memoList, err := Memo{}.All().Query()
@@ -93,11 +92,9 @@ func listHandler(w http.ResponseWriter, r *http.Request) {
 
 func createHandler(w http.ResponseWriter, r *http.Request) {
 
-	fmt.Println("Create Handler")
-
 	memo := Memo{
-		Title:   "default",
-		Content: "default",
+		Title:   "Title",
+		Content: "# Menu",
 	}
 
 	_, err := memo.Save()
@@ -114,7 +111,18 @@ func createHandler(w http.ResponseWriter, r *http.Request) {
 
 func viewHandler(w http.ResponseWriter, r *http.Request) {
 
-	fmt.Println("View Handler")
+	m, err := getMemo(r)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	tc := make(map[string]interface{})
+	tc["Memo"] = m
+	setTemplates(w, tc, "view.tmpl")
+}
+
+func getMemo(r *http.Request) (*Memo, error) {
 
 	url := r.URL.Path
 	pathS := strings.Split(url, "/")
@@ -122,30 +130,48 @@ func viewHandler(w http.ResponseWriter, r *http.Request) {
 
 	id, err := strconv.Atoi(key)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusNotFound)
-		return
+		return nil, err
 	}
 
-	memo, err := Memo{}.Find(id)
+	m, err := Memo{}.Find(id)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusNotFound)
-		return
+		return nil, err
 	}
-
-	tc := make(map[string]interface{})
-	tc["Memo"] = memo
-
-	setTemplates(w, tc, "view.tmpl")
+	return m, nil
 }
 
 func editHandler(w http.ResponseWriter, r *http.Request) {
-	url := r.URL.Path
-	pathS := strings.Split(url, "/")
-	key := pathS[2]
-	memo, _ := Memo{}.FindBy("id", key)
 
-	tc := make(map[string]interface{})
-	tc["Memo"] = memo
+	m, err := getMemo(r)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
 
-	setTemplates(w, tc, "edit.tmpl")
+	if r.Method == "POST" {
+		r.ParseForm()
+
+		m.Title = r.FormValue("title")
+		m.Content = r.FormValue("content")
+
+		m.Save()
+
+	} else if r.Method == "DELETE" {
+		m.Destroy()
+	} else {
+
+		tc := make(map[string]interface{})
+		tc["Memo"] = m
+
+		setTemplates(w, tc, "edit.tmpl")
+		return
+	}
+
+	w.WriteHeader(200)
+	enc := json.NewEncoder(w)
+	d := map[string]interface{}{
+		"success": true,
+	}
+	enc.Encode(d)
+
 }

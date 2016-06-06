@@ -1,5 +1,6 @@
 {{define "JavaScript"}}
 <script>
+
 $(document).ready(function() {
     $(".memoBtn").click(function() {
         var key = $(this).attr('data-id');
@@ -7,11 +8,8 @@ $(document).ready(function() {
         window.open(url, '_blank');
     });
 });
-</script>
-{{end}}
 
-{{define "Title"}}
-Archive
+</script>
 {{end}}
 
 {{define "content"}}
@@ -21,6 +19,7 @@ Archive
 <div class="panel panel-default">
   <div class="panel-heading">ArhciveMemo List</div>
   <table class="table">
+
   {{range .MemoList}}
   <tr> 
     <td><button style="width:100%" type="button" class="btn btn-success memoBtn" data-id="{{.Id}}">{{.Title}}</td>

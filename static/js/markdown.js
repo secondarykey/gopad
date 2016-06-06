@@ -1,5 +1,5 @@
 function change() {
-    var src = $("#editor").val();
+    var src = $("#content").val();
     var html = marked(src);
     $('#result').html(html);
     $('pre code').each(function(i, block) {
@@ -21,6 +21,23 @@ $(document).ready(function() {
         });
     }
 
+    $('#saveBtn').click(function() {
+      $.ajax({
+         url: location.href,
+         type: 'POST',
+         data: { 
+             "title" : $("#title").val(),
+             "content" : $("#content").val(),
+         },
+         dataType: 'json'
+      }).success(function( data ) {
+
+      }).error(function() {
+          alert("Error!");
+      });
+      return false;
+    });
+
     $('#deleteBtn').click(function() {
       $.ajax({
          url: location.href,
@@ -28,24 +45,18 @@ $(document).ready(function() {
          data: { },
          dataType: 'json'
       }).success(function( data ) {
-          window.close();
+          location.href = "/";
       }).error(function() {
           alert("Error!");
       });
       return false;
     });
 
-    $('#deleteBtn').popConfirm({
-          title:"Delete Memo",
-          content:"Delete?",
-          placement:"bottom"
-    });
-
     marked.setOptions({
         langPrefix: ''
     });
 
-    $('#editor').keyup(function() {
+    $('#content').keyup(function() {
         change();
     });
     change();
