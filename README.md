@@ -3,9 +3,8 @@ Markdown memo tool
 
 # Using
 
-
-
-
+    github.com/mattn/go-sqlite3
+    github.com/monochromegane/argen
 
 # Build
 
