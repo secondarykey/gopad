@@ -174,6 +174,9 @@ func editHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	msg := "success " + r.Method
+	code := 200
+
 	if r.Method == "GET" {
 
 		tc := make(map[string]interface{})
@@ -189,11 +192,19 @@ func editHandler(w http.ResponseWriter, r *http.Request) {
 		m.Title = r.FormValue("title")
 		m.Content = r.FormValue("content")
 
-		_, err = m.Save()
+		_, arerr := m.Save()
+		if arerr != nil {
+			code = 500
+			msg = arerr.Error()
+		}
 
 	} else if r.Method == "DELETE" {
 
-		_, err = m.Destroy()
+		_, arerr := m.Destroy()
+		if arerr != nil {
+			code = 500
+			msg = arerr.Error()
+		}
 
 	} else {
 		http.Error(w, "Not Allowed Method "+r.Method, http.StatusMethodNotAllowed)
@@ -201,14 +212,6 @@ func editHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	//return JSON
-
-	msg := "success " + r.Method
-	code := 200
-
-	if err != nil {
-		code = 500
-		msg = err.Error()
-	}
 
 	w.WriteHeader(code)
 	enc := json.NewEncoder(w)
