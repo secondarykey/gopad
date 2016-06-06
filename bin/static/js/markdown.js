@@ -32,23 +32,27 @@ $(document).ready(function() {
          dataType: 'json'
       }).success(function( data ) {
 
-      }).error(function() {
+      }).error(function(err) {
+          console.log(err);
           alert("Error!");
       });
       return false;
     });
 
     $('#deleteBtn').click(function() {
-      $.ajax({
-         url: location.href,
-         type: 'DELETE',
-         data: { },
-         dataType: 'json'
-      }).success(function( data ) {
-          location.href = "/";
-      }).error(function() {
-          alert("Error!");
-      });
+      if ( confirm("Delete") ) {
+        $.ajax({
+           url: location.href,
+           type: 'DELETE',
+           data: { },
+           dataType: 'json'
+        }).success(function( data ) {
+            location.href = "/";
+        }).error(function(err) {
+            console.log(err);
+            alert("Error!");
+        });
+      }
       return false;
     });
 
