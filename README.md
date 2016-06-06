@@ -23,11 +23,11 @@ default filename gopad.db
 # If you publish if
 
 
-    gopad -p port -server "" filename
+    gopad -server "" filename
 
 or
 
-    gopad -p port -server "" filename
+    gopad -server localhot filename
 
 # Run(Develop)
 
