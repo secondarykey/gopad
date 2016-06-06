@@ -4,14 +4,21 @@ Markdown memo tool
 
 # Build
 
-    go build -o bin/gopad.exe src/*.go
+    go build -o bin/gopad src/*.go
 
-    cd bin
+move directry "bin"
 
-    gopad.exe -p port "database filename(default gopad.db)"
+
+# Run
+
+    gopad -p port filename
 
 default port 5005
+default filename gopad.db
 
 # Run(Develop)
 
     go run src/*.go -base bin
+
+default base ""
+
