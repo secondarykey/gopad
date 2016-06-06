@@ -3,8 +3,10 @@ package main
 import (
 	"database/sql"
 	"encoding/json"
+	"flag"
 	"fmt"
 	"html/template"
+	"log"
 	"net/http"
 	"os"
 	"strconv"
@@ -22,18 +24,37 @@ func init() {
 	http.HandleFunc("/create", createHandler)
 	// presentation
 
+	log.SetFlags(log.Lshortfile)
 }
 
 func main() {
-	err := listen("gopad.db")
+
+	var port int
+	flag.IntVar(&port, "p", 5005, "Use Port")
+
+	flag.Parse()
+
+	args := flag.Args()
+	leng := len(args)
+
+	dbfile := ""
+	switch leng {
+	case 0:
+		dbfile = "gopad.db"
+	case 1:
+		dbfile = args[0]
+	}
+
+	err := listen(dbfile, port)
 	if err != nil {
-		fmt.Printf("gopad listen Error %v\n", err)
+		fmt.Printf("gopad listen Error :%v\n", err)
 		os.Exit(1)
 	}
 }
 
-func listen(file string) error {
+func listen(file string, p int) error {
 
+	fmt.Println("###### gopad Start")
 	_, err := os.Stat(file)
 	flag := err == nil
 
@@ -41,21 +62,23 @@ func listen(file string) error {
 	if err != nil {
 		return fmt.Errorf("Database Open Error : %v", err)
 	}
-	fmt.Println("###### Serve Database")
 
 	if !flag {
+		fmt.Println("---- CREATE TABLE[" + file + "]")
 		_, err := db.Exec("CREATE TABLE memos(ID INTEGER PRIMARY KEY AUTOINCREMENT,TITLE VARCHAR(255),CONTENT TEXT)")
 		if err != nil {
 			return fmt.Errorf("Create Table Error : %v", err)
 		}
 	}
 
+	fmt.Println("###### Serve Database[" + file + "]")
 	Use(db)
 
 	http.Handle("/static/", http.FileServer(http.Dir("")))
 
-	fmt.Println("###### Serve Web")
-	return http.ListenAndServe(":5005", nil)
+	port := fmt.Sprintf("%d", p)
+	fmt.Println("###### Serve Web [" + port + "]")
+	return http.ListenAndServe(":"+port, nil)
 }
 
 func setTemplates(w http.ResponseWriter, p interface{}, files ...string) {
