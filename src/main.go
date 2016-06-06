@@ -35,7 +35,7 @@ func main() {
 	var port int
 	var server string
 
-	flag.IntVar(&port, "p", 5005, "Use Port")
+	flag.IntVar(&port, "port", 5005, "Use Port")
 	flag.StringVar(&baseDir, "base", "", "Base Directory")
 	flag.StringVar(&server, "server", "127.0.0.1", "Server Address")
 
