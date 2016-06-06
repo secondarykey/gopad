@@ -214,7 +214,7 @@ func editHandler(w http.ResponseWriter, r *http.Request) {
 	enc := json.NewEncoder(w)
 
 	d := map[string]interface{}{
-		"success":  flg,
+		"success":  err == nil,
 		"messages": msg,
 	}
 	enc.Encode(d)
