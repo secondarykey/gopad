@@ -175,12 +175,15 @@ func editHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if r.Method == "GET" {
+
 		tc := make(map[string]interface{})
 		tc["Memo"] = m
 
 		setTemplates(w, tc, "edit.tmpl")
 		return
+
 	} else if r.Method == "POST" {
+
 		r.ParseForm()
 
 		m.Title = r.FormValue("title")
@@ -189,6 +192,7 @@ func editHandler(w http.ResponseWriter, r *http.Request) {
 		_, err = m.Save()
 
 	} else if r.Method == "DELETE" {
+
 		_, err = m.Destroy()
 
 	} else {
@@ -198,10 +202,10 @@ func editHandler(w http.ResponseWriter, r *http.Request) {
 
 	//return JSON
 
-	flg := err == nil
 	msg := "success " + r.Method
 	code := 200
-	if !flg {
+
+	if err != nil {
 		code = 500
 		msg = err.Error()
 	}
