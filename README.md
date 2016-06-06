@@ -1,6 +1,11 @@
 
 Markdown memo tool
 
+# Using
+
+
+
+
 
 # Build
 
@@ -15,6 +20,15 @@ move directry "bin"
 
 default port 5005
 default filename gopad.db
+
+# If you publish if
+
+
+    gopad -p port -server "" filename
+
+or
+
+    gopad -p port -server "" filename
 
 # Run(Develop)
 

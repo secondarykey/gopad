@@ -33,8 +33,11 @@ var baseDir string
 func main() {
 
 	var port int
+	var server string
+
 	flag.IntVar(&port, "p", 5005, "Use Port")
 	flag.StringVar(&baseDir, "base", "", "Base Directory")
+	flag.StringVar(&server, "server", "127.0.0.1", "Server Address")
 
 	flag.Parse()
 
@@ -49,14 +52,14 @@ func main() {
 		dbfile = args[0]
 	}
 
-	err := listen(dbfile, port)
+	err := listen(dbfile, port, server)
 	if err != nil {
 		log.Printf("gopad listen Error :%v\n", err)
 		os.Exit(1)
 	}
 }
 
-func listen(file string, p int) error {
+func listen(file string, p int, web string) error {
 
 	log.Println("###### gopad Start(Base Directory:[" + baseDir + "]")
 	_, err := os.Stat(file)
@@ -81,9 +84,10 @@ func listen(file string, p int) error {
 	http.Handle("/static/", http.FileServer(http.Dir(baseDir)))
 
 	port := fmt.Sprintf("%d", p)
-	log.Println("###### Serve Web [" + port + "]")
+	address := web + ":" + port
+	log.Println("###### Serve Web [" + address + "]")
 
-	return http.ListenAndServe(":"+port, nil)
+	return http.ListenAndServe(address, nil)
 }
 
 func setTemplates(w http.ResponseWriter, p interface{}, files ...string) {
