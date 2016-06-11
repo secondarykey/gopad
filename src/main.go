@@ -37,7 +37,7 @@ func main() {
 
 	flag.IntVar(&port, "port", 5005, "Use Port")
 	flag.StringVar(&baseDir, "base", "", "Base Directory")
-	flag.StringVar(&server, "server", "127.0.0.1", "Server Address")
+	flag.StringVar(&server, "server", "localhost", "Server Address")
 
 	flag.Parse()
 
@@ -196,18 +196,18 @@ func editHandler(w http.ResponseWriter, r *http.Request) {
 		m.Title = r.FormValue("title")
 		m.Content = r.FormValue("content")
 
-		_, arerr := m.Save()
-		if arerr != nil {
+		_, ar := m.Save()
+		if ar != nil {
+			msg = ar.Error()
 			code = 500
-			msg = arerr.Error()
 		}
 
 	} else if r.Method == "DELETE" {
 
-		_, arerr := m.Destroy()
-		if arerr != nil {
+		_, ar := m.Destroy()
+		if ar != nil {
+			msg = ar.Error()
 			code = 500
-			msg = arerr.Error()
 		}
 
 	} else {

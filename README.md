@@ -10,10 +10,9 @@ Markdown memo tool
 
     go build -o bin/gopad src/*.go
 
-move directry "bin"
-
-
 # Run
+
+move directry "bin"
 
     gopad -p port filename
 
@@ -22,12 +21,9 @@ default filename gopad.db
 
 # If you publish if
 
-
     gopad -server "" filename
 
-or
-
-    gopad -server localhot filename
+default localhost
 
 # Run(Develop)
 
