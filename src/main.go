@@ -172,7 +172,10 @@ func getMemo(r *http.Request) (*Memo, error) {
 
 func editHandler(w http.ResponseWriter, r *http.Request) {
 
-	m, err := getMemo(r)
+//START HL001
+        var err error
+        var m *Memo
+	m, err = getMemo(r)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -180,6 +183,7 @@ func editHandler(w http.ResponseWriter, r *http.Request) {
 
 	msg := "success " + r.Method
 	code := 200
+//END HL001
 
 	if r.Method == "GET" {
 
@@ -189,6 +193,7 @@ func editHandler(w http.ResponseWriter, r *http.Request) {
 		setTemplates(w, tc, "edit.tmpl")
 		return
 
+//START HL002
 	} else if r.Method == "POST" {
 
 		r.ParseForm()
@@ -196,19 +201,12 @@ func editHandler(w http.ResponseWriter, r *http.Request) {
 		m.Title = r.FormValue("title")
 		m.Content = r.FormValue("content")
 
-		_, ar := m.Save()
-		if ar != nil {
-			msg = ar.Error()
-			code = 500
-		}
+		_, err = m.Save()
 
 	} else if r.Method == "DELETE" {
+//END HL002
 
-		_, ar := m.Destroy()
-		if ar != nil {
-			msg = ar.Error()
-			code = 500
-		}
+		_, err = m.Destroy()
 
 	} else {
 		http.Error(w, "Not Allowed Method "+r.Method, http.StatusMethodNotAllowed)
@@ -216,6 +214,12 @@ func editHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	//return JSON
+//START HL003
+	if err != nil {
+		msg = err.Error()
+		code = 500
+	}
+//END HL003
 
 	w.WriteHeader(code)
 	enc := json.NewEncoder(w)
