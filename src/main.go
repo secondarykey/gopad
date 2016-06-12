@@ -172,9 +172,9 @@ func getMemo(r *http.Request) (*Memo, error) {
 
 func editHandler(w http.ResponseWriter, r *http.Request) {
 
-//START HL001
-        var err error
-        var m *Memo
+	//START HL001
+	var err error
+	var m *Memo
 	m, err = getMemo(r)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -183,7 +183,7 @@ func editHandler(w http.ResponseWriter, r *http.Request) {
 
 	msg := "success " + r.Method
 	code := 200
-//END HL001
+	//END HL001
 
 	if r.Method == "GET" {
 
@@ -193,7 +193,7 @@ func editHandler(w http.ResponseWriter, r *http.Request) {
 		setTemplates(w, tc, "edit.tmpl")
 		return
 
-//START HL002
+		//START HL002
 	} else if r.Method == "POST" {
 
 		r.ParseForm()
@@ -204,7 +204,7 @@ func editHandler(w http.ResponseWriter, r *http.Request) {
 		_, err = m.Save()
 
 	} else if r.Method == "DELETE" {
-//END HL002
+		//END HL002
 
 		_, err = m.Destroy()
 
@@ -214,12 +214,12 @@ func editHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	//return JSON
-//START HL003
+	//START HL003
 	if err != nil {
 		msg = err.Error()
 		code = 500
 	}
-//END HL003
+	//END HL003
 
 	w.WriteHeader(code)
 	enc := json.NewEncoder(w)
