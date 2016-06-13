@@ -130,7 +130,7 @@ func (r *MemoRelation) Having(cond string, args ...interface{}) *MemoRelation {
 	return r
 }
 
-func (m Memo) IsValid() (bool, *ar.Errors) {
+func (m Memo) IsValid() (bool, error) {
 	result := true
 	errors := &ar.Errors{}
 	var on ar.On
@@ -167,7 +167,7 @@ func (m Memo) Build(p MemoParams) *Memo {
 	}
 }
 
-func (m Memo) Create(p MemoParams) (*Memo, *ar.Errors) {
+func (m Memo) Create(p MemoParams) (*Memo, error) {
 	n := m.Build(p)
 	_, errs := n.Save()
 	return n, errs
@@ -181,7 +181,7 @@ func (m *Memo) IsPersistent() bool {
 	return !m.IsNewRecord()
 }
 
-func (m *Memo) Save(validate ...bool) (bool, *ar.Errors) {
+func (m *Memo) Save(validate ...bool) (bool, error) {
 	if len(validate) == 0 || len(validate) > 0 && validate[0] {
 		if ok, errs := m.IsValid(); !ok {
 			return false, errs
@@ -218,7 +218,7 @@ func (m *Memo) Save(validate ...bool) (bool, *ar.Errors) {
 	}
 }
 
-func (m *Memo) Update(p MemoParams) (bool, *ar.Errors) {
+func (m *Memo) Update(p MemoParams) (bool, error) {
 
 	if !ar.IsZero(p.Id) {
 		m.Id = p.Id
@@ -232,7 +232,7 @@ func (m *Memo) Update(p MemoParams) (bool, *ar.Errors) {
 	return m.Save()
 }
 
-func (m *Memo) UpdateColumns(p MemoParams) (bool, *ar.Errors) {
+func (m *Memo) UpdateColumns(p MemoParams) (bool, error) {
 
 	if !ar.IsZero(p.Id) {
 		m.Id = p.Id
@@ -246,11 +246,11 @@ func (m *Memo) UpdateColumns(p MemoParams) (bool, *ar.Errors) {
 	return m.Save(false)
 }
 
-func (m *Memo) Destroy() (bool, *ar.Errors) {
+func (m *Memo) Destroy() (bool, error) {
 	return m.Delete()
 }
 
-func (m *Memo) Delete() (bool, *ar.Errors) {
+func (m *Memo) Delete() (bool, error) {
 	errs := &ar.Errors{}
 	if _, err := ar.NewDelete(db, logger).Table("memos").Where("id", m.Id).Exec(); err != nil {
 		errs.AddError("base", err)
@@ -259,7 +259,7 @@ func (m *Memo) Delete() (bool, *ar.Errors) {
 	return true, nil
 }
 
-func (m Memo) DeleteAll() (bool, *ar.Errors) {
+func (m Memo) DeleteAll() (bool, error) {
 	errs := &ar.Errors{}
 	if _, err := ar.NewDelete(db, logger).Table("memos").Exec(); err != nil {
 		errs.AddError("base", err)
