@@ -1,30 +1,28 @@
 {{define "JavaScript"}}
-<script>
-
-$(document).ready(function() {
-    $(".memoBtn").click(function() {
-        var key = $(this).attr('data-id');
-        var url = "http://" + location.host + "/view/" + key;
-        window.open(url, '_blank');
-    });
-});
-
-</script>
 {{end}}
 
 {{define "content"}}
 
-<a href="/create">create</a>
-
 <div class="panel panel-default">
-  <div class="panel-heading">ArhciveMemo List</div>
+
+  <div class="panel-heading">
+     <a href="/create" class="btn btn-primary">Create Memo</a>
+  </div>
+
   <table class="table">
 
   {{range .MemoList}}
+
   <tr> 
-    <td><button style="width:100%" type="button" class="btn btn-success memoBtn" data-id="{{.Id}}">{{.Title}}</td>
+    <td>
+   
+    <a style="width:100%;" class="btn btn-success"href="/view/{{.Id}}">{{.Title}}</a>
+
+    </td>
+
   </tr>
   {{end}}
   </table>
+
 </div>
 {{end}}
