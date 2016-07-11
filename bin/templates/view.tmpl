@@ -7,6 +7,8 @@
 
 {{define "content"}}
 
+<a class="btn btn-primary form-control" href="/download/{{.Memo.Id}}" role="button">Download</a>
+
 <h1>{{.Memo.Title}}</h1>
 
   <input type="hidden" id="content" value="{{.Memo.Content}}"/>

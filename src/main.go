@@ -22,6 +22,8 @@ func init() {
 	http.HandleFunc("/view/", viewHandler)
 	http.HandleFunc("/edit/", editHandler)
 
+	http.HandleFunc("/download/", downloadHandler)
+
 	http.HandleFunc("/create", createHandler)
 	// presentation
 
@@ -172,7 +174,6 @@ func getMemo(r *http.Request) (*Memo, error) {
 
 func editHandler(w http.ResponseWriter, r *http.Request) {
 
-	//START HL001
 	var err error
 	var m *Memo
 	m, err = getMemo(r)
@@ -183,7 +184,6 @@ func editHandler(w http.ResponseWriter, r *http.Request) {
 
 	msg := "success " + r.Method
 	code := 200
-	//END HL001
 
 	if r.Method == "GET" {
 
@@ -193,7 +193,6 @@ func editHandler(w http.ResponseWriter, r *http.Request) {
 		setTemplates(w, tc, "edit.tmpl")
 		return
 
-		//START HL002
 	} else if r.Method == "POST" {
 
 		r.ParseForm()
@@ -204,7 +203,6 @@ func editHandler(w http.ResponseWriter, r *http.Request) {
 		_, err = m.Save()
 
 	} else if r.Method == "DELETE" {
-		//END HL002
 
 		_, err = m.Destroy()
 
@@ -214,12 +212,10 @@ func editHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	//return JSON
-	//START HL003
 	if err != nil {
 		msg = err.Error()
 		code = 500
 	}
-	//END HL003
 
 	w.WriteHeader(code)
 	enc := json.NewEncoder(w)
@@ -229,4 +225,32 @@ func editHandler(w http.ResponseWriter, r *http.Request) {
 		"messages": msg,
 	}
 	enc.Encode(d)
+}
+
+func downloadHandler(w http.ResponseWriter, r *http.Request) {
+
+	m, err := getMemo(r)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Disposition", "attachment; filename="+m.Title+".html")
+	//w.Header().Set("Content-Type", "text/html")
+
+	templateDir := filepath.Join(baseDir, "templates")
+	temp := templateDir + "/slide.tmpl"
+
+	m.Content = "# " + m.Title + "\n\n" + m.Content
+
+	tc := make(map[string]interface{})
+	tc["Memo"] = m
+
+	tmpl := template.Must(template.ParseFiles(temp))
+
+	if err := tmpl.Execute(w, tc); err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
 }
