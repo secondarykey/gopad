@@ -241,10 +241,10 @@ func downloadHandler(w http.ResponseWriter, r *http.Request) {
 	templateDir := filepath.Join(baseDir, "templates")
 	temp := templateDir + "/slide.tmpl"
 
-	m.Content = "# " + m.Title + "\n\n" + m.Content
-
 	tc := make(map[string]interface{})
-	tc["Memo"] = m
+
+	tc["Title"] = m.Title
+	tc["Content"] = rendaring(m)
 
 	tmpl := template.Must(template.ParseFiles(temp))
 
@@ -252,5 +252,46 @@ func downloadHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-
 }
+
+func rendaring(m *Memo) string {
+
+	var rtn = bytes.NewBuffer(make([]byte, 0, 100))
+
+	rtn.WriteString("class: center,middle\n")
+	rtn.WriteString(m.Title + "\n" + "---" + "\n\n")
+
+	marks := rendaring(m.Content, 1)
+	build(marks)
+
+	return rtn.String()
+}
+
+func rendaring(s string, idx int) []mark {
+
+	m := make([]mark, 8)
+
+	// idx * "#" indexOf
+	// remain rendaring(remain,idx + 1)
+	// loop
+
+	return m
+}
+
+type mark struct {
+	title    string
+	content  string
+	children []mark
+}
+
+// class: left, top
+// ## mark.title
+// mark.content
+// .footnote[ parent.title / parent.title ]
+// ---
+
+//.footnote {
+//   position: absolute;
+//   bottom: 12px;
+//   left: 20px;
+//}

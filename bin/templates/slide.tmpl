@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-<title>{{ .Memo.Title }}</title>
+<title>{{ .Title }}</title>
 <meta charset="utf-8">
 <style>
 @import url(https://fonts.googleapis.com/css?family=Yanone+Kaffeesatz);
@@ -13,6 +13,13 @@ h1, h2, h3 {
 font-family: 'Yanone Kaffeesatz';
 font-weight: normal;
 }
+
+.footnote {
+   position: absolute;
+   bottom: 12px;
+   left: 20px;
+}
+
 .remark-code, .remark-inline-code { font-family: 'Ubuntu Mono'; }
 </style>
 </head>
@@ -21,7 +28,7 @@ font-weight: normal;
 
 class: center, middle
 
-{{ .Memo.Content }}
+{{ .Content }}
 
 </textarea>
 <script src="https://gnab.github.io/remark/downloads/remark-latest.min.js">
