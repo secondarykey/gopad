@@ -1,6 +1,8 @@
 package main
 
 import (
+	"bufio"
+	"bytes"
 	"database/sql"
 	"encoding/json"
 	"flag"
@@ -244,7 +246,7 @@ func downloadHandler(w http.ResponseWriter, r *http.Request) {
 	tc := make(map[string]interface{})
 
 	tc["Title"] = m.Title
-	tc["Content"] = rendaring(m)
+	tc["Content"] = rendar(m)
 
 	tmpl := template.Must(template.ParseFiles(temp))
 
@@ -254,26 +256,104 @@ func downloadHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func rendaring(m *Memo) string {
+func rendar(m *Memo) string {
+
+	fmt.Println("rendar()")
 
 	var rtn = bytes.NewBuffer(make([]byte, 0, 100))
 
 	rtn.WriteString("class: center,middle\n")
-	rtn.WriteString(m.Title + "\n" + "---" + "\n\n")
+	rtn.WriteString("# " + m.Title + "\n" + "---" + "\n\n")
 
 	marks := rendaring(m.Content, 1)
-	build(marks)
+	rtn.WriteString(build(marks, m.Title))
 
+	return rtn.String()
+}
+
+func build(ms []mark, t string) string {
+
+	fmt.Println("build()")
+
+	var rtn = bytes.NewBuffer(make([]byte, 0, 100))
+	for _, m := range ms {
+
+		rtn.WriteString("class: top,left\n")
+		rtn.WriteString("## " + m.title + "\n\n")
+		rtn.WriteString(m.content + "\n\n")
+		rtn.WriteString(".footnote[" + t + "]\n\n")
+
+		if m.children != nil {
+			rtn.WriteString(build(m.children, t+"/"+m.title))
+		}
+		rtn.WriteString("---\n\n")
+	}
 	return rtn.String()
 }
 
 func rendaring(s string, idx int) []mark {
 
-	m := make([]mark, 8)
+	fmt.Printf("rendaring(%s,%d)\n", s, idx)
 
-	// idx * "#" indexOf
-	// remain rendaring(remain,idx + 1)
-	// loop
+	m := make([]mark, 8)
+	r := strings.NewReader(s)
+
+	lines := make([]string, 128)
+	scanner := bufio.NewScanner(r)
+	for scanner.Scan() {
+		lines = append(lines, scanner.Text())
+	}
+	if serr := scanner.Err(); serr != nil {
+		fmt.Printf("%v\n", serr)
+		panic(serr)
+	}
+
+	header := strings.Repeat("#", idx) + " "
+	fmt.Println(header)
+
+	data := ""
+	flg := false
+	var mk mark
+
+	for _, line := range lines {
+
+		if line == "" {
+			continue
+		}
+
+		idx := strings.Index(line, header)
+		if idx == 0 {
+
+			if data != "" {
+				mk.children = rendaring(data, idx+1)
+				m = append(m, mk)
+				data = ""
+			}
+
+			mk = mark{
+				title:    "",
+				content:  "",
+				children: nil,
+			}
+
+			mk.title = line[idx+1:]
+			flg = false
+
+		} else if idx > -1 {
+			flg = true
+		}
+
+		if flg {
+			data = data + line + "\n"
+		} else {
+			mk.content = mk.content + line + "\n"
+		}
+	}
+
+	if data != "" {
+		mk.children = rendaring(data, idx+1)
+	}
+	m = append(m, mk)
 
 	return m
 }
