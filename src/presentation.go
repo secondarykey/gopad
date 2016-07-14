@@ -12,12 +12,10 @@ func init() {
 
 func render(m *Memo) string {
 
-	fmt.Println("render()")
-
 	var rtn = bytes.NewBuffer(make([]byte, 0, 100))
 
 	rtn.WriteString("class: center,middle\n")
-	rtn.WriteString("# " + m.Title + "\n" + "---" + "\n\n")
+	rtn.WriteString("# " + m.Title + "\n\n")
 
 	marks := rendering(m.Content, 1)
 	rtn.WriteString(build(marks, m.Title))
@@ -27,13 +25,16 @@ func render(m *Memo) string {
 
 func build(ms []*mark, t string) string {
 
-	fmt.Println("build()")
 	var rtn = bytes.NewBuffer(make([]byte, 0, 100))
 
 	for _, m := range ms {
+
 		if m == nil {
 			continue
 		}
+
+		rtn.WriteString("---\n\n")
+
 		rtn.WriteString("class: top,left\n")
 		rtn.WriteString("## " + m.title + "\n\n")
 		rtn.WriteString(m.content + "\n\n")
@@ -41,12 +42,11 @@ func build(ms []*mark, t string) string {
 		if m.children != nil {
 			rtn.WriteString(build(m.children, t+"/"+m.title))
 		}
-		rtn.WriteString("---\n\n")
 	}
 	return rtn.String()
 }
 
-func rendering(s string, idx int) []*mark {
+func rendering(s string, prefix int) []*mark {
 
 	m := make([]*mark, 0)
 	r := strings.NewReader(s)
@@ -61,7 +61,7 @@ func rendering(s string, idx int) []*mark {
 		panic(serr)
 	}
 
-	header := strings.Repeat("#", idx) + " "
+	header := strings.Repeat("#", prefix) + " "
 
 	data := ""
 	flg := false
@@ -76,10 +76,13 @@ func rendering(s string, idx int) []*mark {
 		idx := strings.Index(line, header)
 		if idx == 0 {
 
-			if mk != nil {
-				mk.children = rendering(data, idx+1)
-				m = append(m, mk)
+			if data != "" {
+				mk.children = rendering(data, prefix+1)
 				data = ""
+			}
+
+			if mk != nil {
+				m = append(m, mk)
 			}
 
 			mk = &mark{
@@ -88,7 +91,7 @@ func rendering(s string, idx int) []*mark {
 				children: nil,
 			}
 
-			mk.title = line[idx+1:]
+			mk.title = line[len(header):]
 			flg = false
 
 		} else {
@@ -108,7 +111,7 @@ func rendering(s string, idx int) []*mark {
 	if mk != nil {
 
 		if data != "" {
-			mk.children = rendering(data, idx+1)
+			mk.children = rendering(data, prefix+1)
 		}
 		m = append(m, mk)
 	}
