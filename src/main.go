@@ -8,10 +8,11 @@ import (
 	"html/template"
 	"log"
 	"net/http"
+	"net/url"
 	"os"
 	"path/filepath"
 	"strconv"
-    "strings"
+	"strings"
 
 	_ "github.com/mattn/go-sqlite3"
 )
@@ -235,7 +236,8 @@ func downloadHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	w.Header().Set("Content-Disposition", "attachment; filename="+m.Title+".html")
+	name := url.QueryEscape(m.Title)
+	w.Header().Set("Content-Disposition", "attachment;filename*=UTF-8''"+name+".html")
 	//w.Header().Set("Content-Type", "text/html")
 
 	templateDir := filepath.Join(baseDir, "templates")
@@ -253,5 +255,3 @@ func downloadHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 }
-
-
